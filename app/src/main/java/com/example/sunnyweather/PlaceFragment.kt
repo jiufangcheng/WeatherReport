@@ -32,7 +32,7 @@ class PlaceFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val layoutManager=LinearLayoutManager(activity)
         binding.recyclerView.layoutManager=layoutManager
-        adapter=PlaceAdapter(viewModel.placeList)
+        adapter=PlaceAdapter(this,viewModel.placeList)
         binding.recyclerView.adapter=adapter
         binding.searchPlaceEdit.addTextChangedListener(watcher)
         viewModel.placeLiveData.observe(viewLifecycleOwner, Observer { result->

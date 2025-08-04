@@ -1,5 +1,6 @@
 package com.example.sunnyweather.logic.network
 
+import com.example.sunnyweather.SunnyWeatherApplication
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -11,7 +12,8 @@ object SunnyWeatherNetwork {
     private val weatherService=WeatherServiceCreator.create<WeatherService>()
     private val placeService=PlaceServiceCreator.create<PlaceService>()
     suspend fun searchPlace(address:String)= placeService.searchPlace(address).await()
-    suspend fun searchWeather(adcode:String)= weatherService.searchWeather(adcode).await()
+    suspend fun getRealtimeResponse(token:String,lngLat:String)= weatherService.getRealtimeWeather(token,lngLat).await()
+    suspend fun getDailyReponse(token:String,lngLat:String)= weatherService.getDailyWeather(token,lngLat).await()
     private suspend fun <T> Call<T>.await():T{
         return suspendCoroutine{continuation ->
             enqueue(object : Callback<T> {

@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 
 
 data class PlaceResponse(val status: String,val geocodes:List<Geocode>)
-data class Geocode(@SerializedName("formatted_address") val address:String,val adcode:String,val city:String)
+data class Geocode(@SerializedName("formatted_address") val address:String,val adcode:String,val city:String,val location:String)
 
 /**
  * {

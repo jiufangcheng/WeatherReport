@@ -1,0 +1,101 @@
+package com.example.sunnyweather
+
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
+import com.example.sunnyweather.databinding.ActivityWeatherBinding
+import com.example.sunnyweather.databinding.ForecastBinding
+import com.example.sunnyweather.databinding.LifeIndexBinding
+import com.example.sunnyweather.databinding.NowBinding
+import com.example.sunnyweather.logic.model.Weather
+import com.example.sunnyweather.logic.model.getSky
+import com.example.sunnyweather.ui.weather.WeatherViewModel
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+class WeatherActivity : AppCompatActivity() {
+    private lateinit var binding:ActivityWeatherBinding
+
+    val viewModel by lazy {
+        ViewModelProvider(this).get(WeatherViewModel::class.java)
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        binding=ActivityWeatherBinding.inflate(layoutInflater)
+
+
+        setContentView(binding.root)
+
+        if (viewModel.lngLat.isEmpty()){
+            viewModel.lngLat=intent.getStringExtra("location")?:""
+        }
+        if (viewModel.placeName.isEmpty()){
+            viewModel.placeName=intent.getStringExtra("place_name")?:""
+        }
+
+        viewModel.weatherLiveData.observe(this, Observer {result->
+            val weather=result.getOrNull()
+            if (weather!=null){
+                showWeatherInfo(weather)
+            }else{
+                Toast.makeText(this, "无法成功获取天气信息", Toast.LENGTH_SHORT).show()
+                result.exceptionOrNull()?.printStackTrace()
+            }
+        })
+        viewModel.refreshWeather(viewModel.lngLat)
+
+    }
+
+    private fun showWeatherInfo(weather: Weather) {
+        binding.now.placeName.text=viewModel.placeName
+        val realtime=weather.realtime
+        val daily=weather.daily
+        //now
+
+        binding.now.currentTemp.text="${realtime.temperature.toInt()}"
+        binding.now.currentSky.text= getSky(realtime.skycon).info
+        binding.now.currentAQI.text="空气指数 ${realtime.airQuality.aqi.chn.toInt()}"
+        binding.now.nowLayout.setBackgroundResource(getSky(realtime.skycon).bg)
+
+        //forecast
+        binding.forecast.forecastLayout.removeAllViews()
+        val days=daily.skycon.size
+        for (i in 0 until days){
+            val skycon = daily.skycon[i]
+            val temperature = daily.temperature[i]
+            val view = LayoutInflater.from(this).inflate(R.layout.forecast_item,
+                binding.forecast.forecastLayout, false)
+            val dateInfo = view.findViewById(R.id.dateInfo) as TextView
+            val skyIcon = view.findViewById(R.id.skyIcon) as ImageView
+            val skyInfo = view.findViewById(R.id.skyInfo) as TextView
+            val temperatureInfo = view.findViewById(R.id.temperatureInfo) as TextView
+            val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            dateInfo.text = simpleDateFormat.format(skycon.date)
+            val sky = getSky(skycon.value)
+            skyIcon.setImageResource(sky.icon)
+            skyInfo.text = sky.info
+            val tempText = "${temperature.min.toInt()} ~ ${temperature.max.toInt()} ℃"
+            temperatureInfo.text = tempText
+            binding.forecast.forecastLayout.addView(view)
+
+        }
+        val lifeIndex = daily.lifeIndex
+        binding.lifeIndex.coldRiskText.text = lifeIndex.coldRisk[0].desc
+        binding.lifeIndex.dressingText.text = lifeIndex.dressing[0].desc
+        binding.lifeIndex.ultravioletText.text = lifeIndex.ultraviolet[0].desc
+        binding.lifeIndex.carWashingText.text = lifeIndex.carWashing[0].desc
+        binding.weatherLayout.visibility = View.VISIBLE
+
+    }
+}
