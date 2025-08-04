@@ -37,7 +37,7 @@ class PlaceAdapter(private  val fragment: Fragment,private val _placeList:List<G
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val place=_placeList[position]
-        holder.placeName.text=place.city
+        holder.placeName.text=place.province
         holder.placeAddress.text=place.address
         holder.placeAdcode.text=place.adcode
     }
