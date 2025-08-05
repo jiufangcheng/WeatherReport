@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sunnyweather.PlaceFragment
@@ -23,18 +24,29 @@ class PlaceAdapter(private  val fragment: PlaceFragment, private val _placeList:
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val v=LayoutInflater.from(parent.context).inflate(R.layout.place_item,parent,false)
         val holder= ViewHolder(v)
+
         holder.itemView.setOnClickListener{
             val position=holder.adapterPosition
             val place=_placeList[position]
-            val intent=Intent(parent.context,WeatherActivity::class.java).apply {
-                putExtra("location", place.location)
-                putExtra("place_name", place.address)
+            val activity=fragment.activity
+
+            if (activity is WeatherActivity){
+                activity.findViewById<DrawerLayout>(R.id.drawerLayout).closeDrawers()
+                activity.viewModel.lngLat = place.location
+                activity.viewModel.placeName = place.address
+                activity.refreshWeather()
+            }else{
+                val intent=Intent(parent.context,WeatherActivity::class.java).apply {
+                    putExtra("location", place.location)
+                    putExtra("place_name", place.address)
+                }
+
+                fragment.viewModel.savePlace(place)
+
+                fragment.startActivity(intent)
+                fragment.activity?.finish()
             }
 
-            fragment.viewModel.savePlace(place)
-
-            fragment.startActivity(intent)
-            fragment.activity?.finish()
         }
         return holder
     }
