@@ -7,11 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sunnyweather.PlaceFragment
 import com.example.sunnyweather.R
 import com.example.sunnyweather.WeatherActivity
 import com.example.sunnyweather.logic.model.Geocode
 
-class PlaceAdapter(private  val fragment: Fragment,private val _placeList:List<Geocode>): RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
+class PlaceAdapter(private  val fragment: PlaceFragment, private val _placeList:List<Geocode>): RecyclerView.Adapter<PlaceAdapter.ViewHolder>() {
 //    private var _placeList= listOf<Geocode>()
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -29,6 +30,9 @@ class PlaceAdapter(private  val fragment: Fragment,private val _placeList:List<G
                 putExtra("location", place.location)
                 putExtra("place_name", place.address)
             }
+
+            fragment.viewModel.savePlace(place)
+
             fragment.startActivity(intent)
             fragment.activity?.finish()
         }

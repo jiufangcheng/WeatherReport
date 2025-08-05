@@ -20,6 +20,8 @@ class PlaceViewModel : ViewModel() {
         searchPlaceLiveData.value = address
     }
 
-
+    fun savePlace(geocode: Geocode)=Repository.savePlace(geocode)
+    fun getSavedPlace() = Repository.getSavedPlace()
+    fun isPlaceSaved() = Repository.isPlaceSaved()
 
 }

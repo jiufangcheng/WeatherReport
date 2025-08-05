@@ -4,6 +4,7 @@ package com.example.sunnyweather.logic
 import android.util.Log
 import androidx.lifecycle.liveData
 import com.example.sunnyweather.SunnyWeatherApplication
+import com.example.sunnyweather.logic.dao.PlaceDao
 import com.example.sunnyweather.logic.model.Geocode
 import com.example.sunnyweather.logic.model.Weather
 
@@ -16,46 +17,7 @@ import kotlin.coroutines.CoroutineContext
 object Repository {
 
 
-//    fun refreshWeather(lngLat:String)= liveData(Dispatchers.IO) {
-//        val result=try {
-//            coroutineScope {
-//                val deferredRealtime=async {
-//                    SunnyWeatherNetwork.getRealtimeResponse(SunnyWeatherApplication.TOKEN,lngLat)
-//                }
-//                val deferredDaily=async {
-//                    SunnyWeatherNetwork.getDailyReponse(SunnyWeatherApplication.TOKEN,lngLat)
-//                }
-//                val realtimeResponse = deferredRealtime.await()
-//                val dailyResponse = deferredDaily.await()
-//                if (realtimeResponse.status=="ok" && dailyResponse.status=="ok" ){
-//                    val weather=Weather(realtimeResponse.result.realtime,dailyResponse.result.daily)
-//                    Result.success(weather)
-//                }else{
-//                    Result.failure(RuntimeException( "realtime response status is ${realtimeResponse.status}" +
-//                            "daily response status is ${dailyResponse.status})"))
-//                }
-//            }
-//        }catch (e:Exception){
-//            Result.failure<Weather>(e)
-//        }
-//        emit(result)
-//    }
-//
-//
-//    fun searchPlace(address:String)= liveData(Dispatchers.IO){
-//        val result=try{
-//            val placeResponse=SunnyWeatherNetwork.searchPlace(address)
-//            if (placeResponse.status=="1"){
-//                val geocodes=placeResponse.geocodes
-//                Result.success(geocodes)
-//            }else{
-//                Result.failure(RuntimeException("place response is ${placeResponse.status}"))
-//            }
-//        }catch (e:Exception){
-//            Result.failure<List<Geocode>>(e)
-//        }
-//        emit(result)
-//    }
+
     fun searchPlace(address: String) = fire(Dispatchers.IO) {
         val placeResponse = SunnyWeatherNetwork.searchPlace(address)
         if (placeResponse.status == "1") {
@@ -103,4 +65,8 @@ object Repository {
             }
             emit(result)
         }
+
+    fun savePlace(geocode: Geocode)=PlaceDao.savePlace(geocode)
+    fun getSavedPlace()=PlaceDao.getSavedPlace()
+    fun isPlaceSaved()=PlaceDao.isPlaceSaved()
 }

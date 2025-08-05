@@ -1,5 +1,6 @@
 package com.example.sunnyweather
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -21,7 +22,7 @@ import com.example.sunnyweather.ui.place.PlaceViewModel
 
 class PlaceFragment : Fragment() {
     private lateinit var binding: FragmentPlaceBinding
-    private val viewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
+    val viewModel by lazy { ViewModelProvider(this).get(PlaceViewModel::class.java) }
     private lateinit var adapter: PlaceAdapter
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +31,17 @@ class PlaceFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (viewModel.isPlaceSaved()){
+            val place=viewModel.getSavedPlace()
+            val intent=Intent(context,WeatherActivity::class.java).apply {
+                putExtra("location", place.location)
+                putExtra("place_name", place.address)
+            }
+            startActivity(intent)
+            activity?.finish()
+        }
+
         val layoutManager=LinearLayoutManager(activity)
         binding.recyclerView.layoutManager=layoutManager
         adapter=PlaceAdapter(this,viewModel.placeList)
