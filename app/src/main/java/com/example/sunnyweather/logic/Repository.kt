@@ -2,9 +2,12 @@ package com.example.sunnyweather.logic
 
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.liveData
 import com.example.sunnyweather.SunnyWeatherApplication
 import com.example.sunnyweather.logic.dao.PlaceDao
+import com.example.sunnyweather.logic.database.PlaceDatabase
+import com.example.sunnyweather.logic.enity.Place
 import com.example.sunnyweather.logic.model.Geocode
 import com.example.sunnyweather.logic.model.Weather
 
@@ -12,11 +15,12 @@ import com.example.sunnyweather.logic.network.SunnyWeatherNetwork
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 
 object Repository {
 
-
+    val placeManagerDao=PlaceDatabase.getDatabase(SunnyWeatherApplication.context).placeManagerDao()
 
     fun searchPlace(address: String) = fire(Dispatchers.IO) {
         val placeResponse = SunnyWeatherNetwork.searchPlace(address)
@@ -69,4 +73,14 @@ object Repository {
     fun savePlace(geocode: Geocode)=PlaceDao.savePlace(geocode)
     fun getSavedPlace()=PlaceDao.getSavedPlace()
     fun isPlaceSaved()=PlaceDao.isPlaceSaved()
+
+    val allPlaces: LiveData<List<Place>> =placeManagerDao.getAllPlaces()
+    suspend fun addPlace(place: Place)=  placeManagerDao.insert(place)
+    suspend fun deletePlace(place: Place)= placeManagerDao.deletePlace(place)
+    suspend fun queryPlaces(name: String): List<Place> {
+        return placeManagerDao.queryPlaces(name) ?: emptyList()
+    }
+    suspend fun queryPlace(name: String): Place {
+        return placeManagerDao.queryPlace(name)
+    }
 }

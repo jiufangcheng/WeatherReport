@@ -1,11 +1,14 @@
 package com.example.sunnyweather
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.view.View.OnClickListener
 import android.view.inputmethod.InputMethodManager
@@ -21,13 +24,20 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.sunnyweather.SunnyWeatherApplication.Companion.context
 import com.example.sunnyweather.databinding.ActivityWeatherBinding
 import com.example.sunnyweather.databinding.ForecastBinding
 import com.example.sunnyweather.databinding.LifeIndexBinding
 import com.example.sunnyweather.databinding.NowBinding
+import com.example.sunnyweather.logic.Repository
+import com.example.sunnyweather.logic.enity.Place
 import com.example.sunnyweather.logic.model.Weather
 import com.example.sunnyweather.logic.model.getSky
 import com.example.sunnyweather.ui.weather.WeatherViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -41,6 +51,9 @@ class WeatherActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding=ActivityWeatherBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+        setSupportActionBar(binding.now.toolbar) // 在布局中添加Toolbar
+        supportActionBar?.setDisplayShowTitleEnabled(false)
 
         //状态栏沉浸
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -53,7 +66,7 @@ class WeatherActivity : AppCompatActivity() {
         }
 
 
-        setContentView(binding.root)
+
 
         if (viewModel.lngLat.isEmpty()){
             viewModel.lngLat=intent.getStringExtra("location")?:""
@@ -147,5 +160,48 @@ class WeatherActivity : AppCompatActivity() {
         binding.lifeIndex.carWashingText.text = lifeIndex.carWashing[0].desc
         binding.weatherLayout.visibility = View.VISIBLE
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu,menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id=item.itemId
+        when(id) {
+            R.id.collection -> {
+                val place= Place(name = viewModel.placeName, location = viewModel.lngLat)
+                // 收藏当前地点
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val temp=Repository.queryPlace(viewModel.placeName)
+                    if (temp==null){
+                        Repository.addPlace(place)
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(SunnyWeatherApplication.context, "已收藏", Toast.LENGTH_SHORT).show()
+                        }
+
+                    }else{
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, "已经存在", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+
+                }
+
+                    return true
+
+            }
+            R.id.collectionManager -> {
+                startActivity(Intent(this, CollectionManagerActivity::class.java))
+                return true
+            }
+            R.id.setting -> {
+                // 跳转设置页
+                //startActivity(Intent(this, SettingsActivity::class.java))
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

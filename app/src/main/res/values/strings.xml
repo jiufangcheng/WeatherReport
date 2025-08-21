@@ -3,4 +3,8 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search_place_hint">输入地址</string>
+    <string name="collection">收藏</string>
+    <string name="collection_manager">收藏管理</string>
+    <string name="setting">设置</string>
+    <string name="add_city">添加城市</string>
 </resources>

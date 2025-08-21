@@ -16,4 +16,5 @@ interface PlaceService {
         @Query("address") address:String,
         @Query("key") key:String=SunnyWeatherApplication.KEY
     ):Call<PlaceResponse>
+
 }
